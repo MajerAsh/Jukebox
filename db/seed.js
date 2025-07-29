@@ -8,10 +8,12 @@ console.log("🌱 Database seeded.");
 async function seed() {
   // TODO: create the tracks
   for (let i = 1; i <= 20; i++) {
-    await db.query(`INSERT INTO tracks (name, duration_ms) VALUES ($1, $2)`, [
-      `Track ${i}`,
-      180000 + i * 1000,
-    ]);
+    // loop(iterator variable, stop cond = 20, iteration statement++)
+    //It inserts 20 tracks into the tracks w name
+    await db.query(
+      `INSERT INTO tracks (name, duration_ms) VALUES ($1, $2)`,
+      [`Track ${i}`, 180000] // 1000 ms = 1 sec, 180000 = 3 minutes
+    );
   }
 
   // Create playlists
