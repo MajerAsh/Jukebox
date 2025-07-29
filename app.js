@@ -1,36 +1,28 @@
-// routes/tracks.js
 import express from "express";
-const router = express.Router();
-import db from "#db/client";
+const app = express();
+import playlistsRouter from "./routes/playlists.js";
+import db from "./db/client.js";
+import tracksRouter from "./routes/tracks.js";
 
-router.get("/", async (req, res) => {
-  const { rows } = await db.query("SELECT * FROM tracks");
-  res.send(rows);
-});
+// Middleware
+app.use(express.json());
 
-router.get("/:id", async (req, res) => {
-  const id = parseInt(req.params.id);
-  if (isNaN(id)) return res.status(400).send("Invalid track ID");
+// Routes
+app.use("/tracks", tracksRouter);
+app.use("/playlists", playlistsRouter);
 
-  const { rows } = await db.query("SELECT * FROM tracks WHERE id = $1", [id]);
-  if (rows.length === 0) return res.status(404).send("Track not found");
-  res.send(rows[0]);
-});
-
-export default router;
-
-//Repeat similar logic for playlists and playlist-tracks, with:
-//Foreign key checks (SELECT before INSERT)
-
-//Unique violation handling (23505)
-//Parameter validation (isNaN())
+// Error handling:
+// invalid input type 22P02:
 app.use((err, req, res, next) => {
   if (err.code === "22P02") {
     return res.status(400).send("Invalid input type.");
   }
+  // foreign key violation 23503:
   if (err.code === "23503") {
     return res.status(400).send("Referenced record not found.");
   }
+
+  //unique violation 23505:
   if (err.code === "23505") {
     return res.status(400).send("Track already in playlist.");
   }
@@ -38,3 +30,6 @@ app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).send("Server error.");
 });
+
+// default export — the app
+export default app;

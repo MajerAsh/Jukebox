@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import db from "#db/client.js";
+import db from "../db/client.js";
 
 router.get("/", async (req, res) => {
   const { rows } = await db.query("SELECT * FROM tracks");
